@@ -1,10 +1,7 @@
-'use strict';
-
-import {readFileSync, writeFileSync} from 'fs';
-import {resolve, relative} from 'path';
-import {sync} from 'glob';
-
-const slash = require('slash');
+import { readFileSync, writeFileSync } from 'fs';
+import { resolve, relative } from 'path';
+import { sync } from 'glob';
+import slash from 'slash';
 
 if (process.argv.length <= 2) {
     console.log('No ignore.txt file provided');
@@ -22,7 +19,7 @@ const ignoredTests = readFileSync(path)
     .toString()
     .split(/\r\n|\r|\n/)
     .filter((l) => l.length)
-    .reduce((acc: {[key: string]: string[]}, l) => {
+    .reduce((acc: { [key: string]: string[] }, l) => {
         const m = l.match(/^(\[(.+)\])?(.+)$/i);
         if (m) {
             acc[m[3]] = m[2] ? m[2].split(',') : [];
@@ -39,8 +36,8 @@ const testList = files.map((filename: string) => `/${slash(relative('../', filen
 writeFileSync(
     outputPath,
     [
-        `export const testList: string[] = ${JSON.stringify(testList, null, 4)};`,
-        `export const ignoredTests: {[key: string]: string[]} = ${JSON.stringify(ignoredTests, null, 4)};`
+        `export const testList = ${JSON.stringify(testList, null, 4)};`,
+        `export const ignoredTests = ${JSON.stringify(ignoredTests, null, 4)};`
     ].join('\n')
 );
 
