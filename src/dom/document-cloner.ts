@@ -1,4 +1,4 @@
-import {Bounds} from '../css/layout/bounds';
+import { Bounds } from '../css/layout/bounds';
 import {
     isBodyElement,
     isCanvasElement,
@@ -16,14 +16,14 @@ import {
     isTextNode,
     isVideoElement
 } from './node-parser';
-import {isIdentToken, nonFunctionArgSeparator} from '../css/syntax/parser';
-import {TokenType} from '../css/syntax/tokenizer';
-import {CounterState, createCounterText} from '../css/types/functions/counter';
-import {LIST_STYLE_TYPE, listStyleType} from '../css/property-descriptors/list-style-type';
-import {CSSParsedCounterDeclaration, CSSParsedPseudoDeclaration} from '../css/index';
-import {getQuote} from '../css/property-descriptors/quotes';
-import {Context} from '../core/context';
-import {DebuggerType, isDebugging} from '../core/debugger';
+import { isIdentToken, nonFunctionArgSeparator } from '../css/syntax/parser';
+import { TokenType } from '../css/syntax/tokenizer';
+import { CounterState, createCounterText } from '../css/types/functions/counter';
+import { LIST_STYLE_TYPE, listStyleType } from '../css/property-descriptors/list-style-type';
+import { CSSParsedCounterDeclaration, CSSParsedPseudoDeclaration } from '../css/index';
+import { getQuote } from '../css/property-descriptors/quotes';
+import { Context } from '../core/context';
+import { DebuggerType, isDebugging } from '../core/debugger';
 
 export interface CloneOptions {
     ignoreElements?: (element: Element) => boolean;
@@ -223,7 +223,12 @@ export class DocumentCloner {
             const clonedCtx = clonedCanvas.getContext('2d');
             if (clonedCtx) {
                 if (!this.options.allowTaint && ctx) {
-                    clonedCtx.putImageData(ctx.getImageData(0, 0, canvas.width, canvas.height), 0, 0);
+                    try {
+                        ctx.getImageData(0, 0, 1, 1);
+                        clonedCtx.drawImage(canvas, 0, 0);
+                    } catch (e) {
+                        ctx.getImageData(0, 0, canvas.width, canvas.height); // trigger original error
+                    }
                 } else {
                     const gl = canvas.getContext('webgl2') ?? canvas.getContext('webgl');
                     if (gl) {
@@ -319,6 +324,10 @@ export class DocumentCloner {
             clone.style.transitionProperty = 'none';
 
             const style = window.getComputedStyle(node);
+            if (style.display === 'none') {
+                return clone;
+            }
+
             const styleBefore = window.getComputedStyle(node, ':before');
             const styleAfter = window.getComputedStyle(node, ':after');
 
